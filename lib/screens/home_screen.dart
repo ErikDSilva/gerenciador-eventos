@@ -1,57 +1,48 @@
 import 'package:flutter/material.dart';
+import '../models/church_profile_model.dart';
+import '../models/event_model.dart';
 import 'event_details_screen.dart';
+import 'add_event_screen.dart';
 
-class HomeScreen extends StatelessWidget {
-  // Adicionamos um parâmetro para receber o tipo da igreja
-  final String churchType;
+class HomeScreen extends StatefulWidget {
+  final ChurchProfile church;
 
-  const HomeScreen({super.key, required this.churchType});
+  const HomeScreen({super.key, required this.church});
 
   @override
-  Widget build(BuildContext context) {
-    final List<String> events = [
-      'Café partilhado',
-      'Estudo Bíblico',
-      'Ensaio do Coral',
-      'Reunião de Jovens',
-    ];
+  _HomeScreenState createState() => _HomeScreenState();
+}
 
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(churchType),
+        title: Text(widget.church.title),
         centerTitle: true,
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: TextField(
-              decoration: InputDecoration(
-                labelText: 'Pesquisar Evento',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10.0),
-                ),
+      body: widget.church.events.isEmpty
+          ? const Center(
+              child: Text(
+                'Ainda não há eventos cadastrados.',
+                style: TextStyle(fontSize: 18, color: Colors.grey),
               ),
-            ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: events.length,
+            )
+          : ListView.builder(
+              padding: const EdgeInsets.all(8.0),
+              itemCount: widget.church.events.length,
               itemBuilder: (context, index) {
-                final event = events[index];
+                final event = widget.church.events[index];
                 return Card(
-                  margin:
-                      const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
                   child: ListTile(
-                    title: Text(event),
-                    subtitle: const Text('Clique para ver os detalhes'),
+                    title: Text(event.name),
+                    subtitle: Text(event.date),
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) =>
-                              EventDetailsScreen(eventName: event),
+                          builder: (context) => EventDetailsScreen(event: event),
                         ),
                       );
                     },
@@ -59,14 +50,18 @@ class HomeScreen extends StatelessWidget {
                 );
               },
             ),
-          ),
-        ],
-      ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.pushNamed(context, '/add_event');
+        onPressed: () async {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AddEventScreen(church: widget.church),
+            ),
+          );
+          setState(() {});
         },
         child: const Icon(Icons.add),
+        tooltip: 'Adicionar Evento',
       ),
     );
   }

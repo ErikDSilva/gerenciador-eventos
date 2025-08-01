@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
+import '../models/event_model.dart';
 
 class EventDetailsScreen extends StatelessWidget {
-  final String eventName;
+  final Event event;
 
-  const EventDetailsScreen({super.key, required this.eventName});
+  const EventDetailsScreen({super.key, required this.event});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(eventName),
+        title: Text(event.name),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -21,19 +22,9 @@ class EventDetailsScreen extends StatelessWidget {
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 16.0),
-            const Text(
-              'Data: 01 de Agosto de 2025',
-              style: TextStyle(fontSize: 18),
-            ),
-            const SizedBox(height: 8.0),
-            const Text(
-              'Horário: 19:30',
-              style: TextStyle(fontSize: 18),
-            ),
-            const SizedBox(height: 8.0),
-            const Text(
-              'Local: Salão Principal',
-              style: TextStyle(fontSize: 18),
+            Text(
+              'Data: ${event.date}',
+              style: const TextStyle(fontSize: 18),
             ),
             const SizedBox(height: 16.0),
             const Text(
@@ -41,9 +32,9 @@ class EventDetailsScreen extends StatelessWidget {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8.0),
-            const Text(
-              'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."',
-              style: TextStyle(fontSize: 16),
+            Text(
+              event.description,
+              style: const TextStyle(fontSize: 16),
             ),
           ],
         ),

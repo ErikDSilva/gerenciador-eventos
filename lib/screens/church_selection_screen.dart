@@ -1,83 +1,83 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import '../models/church_profile_model.dart';
 import 'home_screen.dart';
+import 'login_screen.dart';
 
 class ChurchSelectionScreen extends StatelessWidget {
   const ChurchSelectionScreen({super.key});
 
+  Future<void> _logout(BuildContext context) async {
+    final settingsBox = Hive.box('settings');
+    await settingsBox.put('isLoggedIn', false);
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
+      (Route<dynamic> route) => false,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    Widget buildChurchProfileCard({
-      required IconData icon,
-      required String title,
-      required VoidCallback onTap,
-    }) {
-      return Card(
-        elevation: 4.0,
-        margin: const EdgeInsets.symmetric(vertical: 10.0),
-        child: ListTile(
-          leading: Icon(icon, size: 40, color: Theme.of(context).primaryColor),
-          title: Text(title, style: const TextStyle(fontSize: 18)),
-          trailing: const Icon(Icons.arrow_forward_ios),
-          onTap: onTap,
-        ),
-      );
-    }
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Selecione o Perfil'),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () => _logout(context),
+            tooltip: 'Sair',
+          ),
+        ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            TextField(
-              decoration: InputDecoration(
-                labelText: 'Pesquisar Perfil',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10.0),
-                ),
+      body: ValueListenableBuilder<Box<ChurchProfile>>(
+        valueListenable: Hive.box<ChurchProfile>('churches').listenable(),
+        builder: (context, box, _) {
+          final churches = box.values.toList().cast<ChurchProfile>();
+          if (churches.isEmpty) {
+            return const Center(
+              child: Text(
+                'Nenhuma igreja cadastrada.\nClique em "+" para adicionar a primeira!',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 18, color: Colors.grey),
               ),
-            ),
-            const SizedBox(height: 40),
-
-            const Text(
-              'Ou selecione um dos perfis abaixo:',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w300),
-            ),
-            const SizedBox(height: 20),
-            buildChurchProfileCard(
-              icon: Icons.church,
-              title: 'Igreja 1',
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        const HomeScreen(churchType: 'Igreja 1'),
+            );
+          }
+          return ListView.builder(
+            padding: const EdgeInsets.all(8.0),
+            itemCount: churches.length,
+            itemBuilder: (context, index) {
+              final church = churches[index];
+              return Card(
+                margin: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 8.0),
+                child: ListTile(
+                  leading: Icon(
+                    IconData(church.iconCodePoint, fontFamily: 'MaterialIcons'),
+                    size: 40,
+                    color: Theme.of(context).primaryColor,
                   ),
-                );
-              },
-            ),
-            buildChurchProfileCard(
-              icon: Icons.book,
-              title: 'Igreja 2',
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        const HomeScreen(churchType: 'Igreja 2'),
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
+                  title: Text(church.title, style: const TextStyle(fontSize: 18)),
+                  trailing: const Icon(Icons.arrow_forward_ios),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => HomeScreen(church: church),
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.pushNamed(context, '/add_church');
+        },
+        child: const Icon(Icons.add),
+        tooltip: 'Adicionar Igreja',
       ),
     );
   }
